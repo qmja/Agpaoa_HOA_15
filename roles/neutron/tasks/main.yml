@@ -1,0 +1,33 @@
+- name: Installing components for Neutron
+  apt:
+    name: neutron-linuxbridge-agent
+    state: present
+
+- name: Configuring common component by editing neutron.conf
+  copy:
+    dest: /etc/neutron/neutron.conf
+    content: |
+      [DEFAULT]
+      auth_strategy = keystone
+      [keystone_authtoken]
+      www_authenticate_uri = http://controller:5000
+      auth_url = http://controller:5000
+      memcached_servers = controller:11211
+      auth_type = password
+      project_domain_name = default
+      user_domain_name = default
+      project_name = service
+      username = neutron
+      password = 1234
+
+- name: Starting/Restarting Compute Service
+  service:
+     name: nova-compute
+     state: restarted
+     enabled: true
+     
+- name: Starting/Restarting linux bridge agent
+  service:
+     name: neutron-linuxbridge-agent
+     state: restarted
+     enabled: true
